@@ -1,8 +1,11 @@
+import os
 from django.db import models
+
 from ckeditor.fields import RichTextField
+from django.urls import reverse
+
 from apps.categories.models import Category
 from utils.image_path import upload_product
-import os
 
 
 class Product(models.Model):
@@ -10,24 +13,36 @@ class Product(models.Model):
         Category,
         on_delete=models.CASCADE,
         related_name='products',
-        verbose_name='Категория',
+        verbose_name='Категории',
     )
     title = models.CharField(
         max_length=50,
         verbose_name="Название",
     )
     description = RichTextField(
-        verbose_name="описание",
+        verbose_name="Описание",
     )
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         verbose_name="Цена",
+
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name="Дата создания",
+        verbose_name="Дата создание",
     )
+
+    slug = models.SlugField(
+        max_length=100,
+        unique=True,
+        blank=True,
+        null=True
+    )
+
+    def get_absolute_url(self):
+
+        return reverse('product_detail', kwargs={'slug': self.slug})
 
     def __str__(self):
         return self.title
@@ -35,11 +50,11 @@ class Product(models.Model):
 
 class ProductImages(models.Model):
     product = models.ForeignKey(
-        Product,
-        on_delete=models.CASCADE,
+        Product, on_delete=models.CASCADE,
         related_name='images',
-        verbose_name="Продукт",
+        verbose_name='Продукт'
     )
+
     image = models.ImageField(
         upload_to=upload_product,
         verbose_name="Картинка",
